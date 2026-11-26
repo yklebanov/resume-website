@@ -12,6 +12,18 @@ hosted on [GitHub Pages](https://pages.github.com).
   publishes [src/](src) to GitHub Pages on every push to `main` (enable
   Pages in the repo's Settings → Pages, source: **GitHub Actions**).
 
+## Changelog
+
+[CHANGELOG.md](CHANGELOG.md) is generated from commit messages with
+[git-cliff](https://git-cliff.org), configured in [cliff.toml](cliff.toml).
+[.github/workflows/changelog.yml](.github/workflows/changelog.yml)
+regenerates and commits it automatically on every push to `main`. Using
+[Conventional Commits](https://www.conventionalcommits.org) (`feat:`,
+`fix:`, `docs:`, etc.) groups entries more usefully; other commit messages
+still show up under "Other".
+
+To preview locally: `git-cliff --config cliff.toml`
+
 ## Security tooling
 
 This repo enforces several automated checks via [pre-commit](https://pre-commit.com), configured in [.pre-commit-config.yaml](.pre-commit-config.yaml):
