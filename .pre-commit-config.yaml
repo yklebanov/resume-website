@@ -1,0 +1,45 @@
+repos:
+  # Scans staged changes for hardcoded secrets using the rules in
+  # .gitleaks.toml (extends gitleaks' default ruleset).
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  # Second, independent secret-scanning pass over the whole working tree
+  # using TruffleHog's detectors (defense in depth alongside gitleaks).
+  - repo: local
+    hooks:
+      - id: trufflehog
+        name: TruffleHog
+        description: Scan the repository for secrets with TruffleHog
+        entry: trufflehog filesystem . --fail --no-update
+        language: system
+        pass_filenames: false
+
+  # SAST: static analysis for common security bugs/misconfigurations.
+  # pre-commit installs semgrep itself (pinned via rev) into an isolated
+  # Python env, independent of any locally installed semgrep version.
+  - repo: https://github.com/semgrep/semgrep
+    rev: v1.187.0
+    hooks:
+      - id: semgrep
+        name: Semgrep
+        args:
+          - --config=p/security-audit
+          - --config=p/secrets
+          - --error
+          - --quiet
+          - --skip-unknown-extensions
+
+  # SCA + IaC scanning: catches dependency vulnerabilities and
+  # misconfigurations in anything added to the repo later (e.g. a
+  # package.json or GitHub Actions workflow).
+  - repo: local
+    hooks:
+      - id: trivy-fs
+        name: Trivy (filesystem/IaC/SCA scan)
+        description: Scan the repo for IaC misconfigurations and dependency vulnerabilities
+        entry: trivy fs --exit-code 1 --severity HIGH,CRITICAL --quiet --scanners vuln,misconfig .
+        language: system
+        pass_filenames: false

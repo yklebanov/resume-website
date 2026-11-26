@@ -1,0 +1,6 @@
+# gitleaks configuration for this repo.
+# https://github.com/gitleaks/gitleaks
+title = "resume-website gitleaks config"
+
+[extend]
+useDefault = true
