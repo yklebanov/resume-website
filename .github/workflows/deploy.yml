@@ -20,6 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: actions/configure-pages@v6
+
+      - name: Cache-bust CSS/JS references
+        # Append ?v=<short-sha> to style.css/script.js links so browsers
+        # that cached an older copy (within the long max-age set by
+        # Cloudflare/GitHub Pages) always fetch the latest asset after a
+        # deploy, instead of showing stale, unstyled pages.
+        run: |
+          sha="${GITHUB_SHA:0:7}"
+          find src -name '*.html' -print0 | xargs -0 sed -i \
+            -e "s/style\.css\"/style.css?v=${sha}\"/g" \
+            -e "s/script\.js\"/script.js?v=${sha}\"/g"
+
       - uses: actions/upload-pages-artifact@v5
         with:
           path: src

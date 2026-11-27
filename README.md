@@ -12,17 +12,35 @@ hosted on [GitHub Pages](https://pages.github.com).
   publishes [src/](src) to GitHub Pages on every push to `main` (enable
   Pages in the repo's Settings → Pages, source: **GitHub Actions**).
 
-## Changelog
+## Releases & changelog
 
-[CHANGELOG.md](CHANGELOG.md) is generated from commit messages with
-[git-cliff](https://git-cliff.org), configured in [cliff.toml](cliff.toml).
-[.github/workflows/changelog.yml](.github/workflows/changelog.yml)
-regenerates and commits it automatically on every push to `main`. Using
+[.github/workflows/release.yml](.github/workflows/release.yml) runs on every
+push to `main` and uses [git-cliff](https://git-cliff.org) (configured in
+[cliff.toml](cliff.toml)) to automatically version the project:
+
+1. Computes the next [SemVer](https://semver.org) version from commits since
+   the last tag — `feat:` commits bump minor, `fix:`/other conventional
+   commits bump patch, breaking changes (`!` or a `BREAKING CHANGE:`
+   footer) bump major. Commits matching `chore|ci|docs|style|test` don't
+   trigger a bump on their own (see `[bump]` in `cliff.toml`).
+2. If there's something release-worthy, creates and pushes a new git tag
+   (e.g. `v0.2.0`), regenerates [CHANGELOG.md](CHANGELOG.md) so those
+   commits move from "Unreleased" into that version's section, commits it
+   as `chore(release): vX.Y.Z`, and publishes a
+   [GitHub Release](../../releases) with that section as its notes.
+3. If nothing would bump the version (e.g. only `chore`/`docs` commits),
+   it's a no-op.
+
+[CHANGELOG.md](CHANGELOG.md) follows the
+[Keep a Changelog](https://keepachangelog.com) format (`Added`/`Changed`/
+`Fixed`/`Security`/etc. sections). Using
 [Conventional Commits](https://www.conventionalcommits.org) (`feat:`,
-`fix:`, `docs:`, etc.) groups entries more usefully; other commit messages
-still show up under "Other".
+`fix:`, etc.) is required for a commit to appear in it and drives both the
+grouping and the version bump — non-conventional commit messages are
+filtered out of the changelog entirely and don't affect versioning.
 
-To preview locally: `git-cliff --config cliff.toml`
+To preview locally: `git-cliff --config cliff.toml` (or add
+`--bumped-version` to see what the next version would be).
 
 ## Security tooling
 

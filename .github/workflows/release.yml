@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    # Skip commits this job itself creates (the release tag + changelog
+    # commit), to avoid an infinite loop of the workflow triggering itself.
+    if: "!contains(github.event.head_commit.message, 'chore(release):')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install git-cliff
+        uses: taiki-e/install-action@git-cliff
+
+      - name: Determine next version
+        id: version
+        run: |
+          current="$(git describe --tags --abbrev=0 2>/dev/null || echo '')"
+          next="$(git-cliff --config cliff.toml --bumped-version)"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "next=$next" >> "$GITHUB_OUTPUT"
+          if [ "$current" = "$next" ]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "Nothing release-worthy since $current; skipping."
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "Releasing $next (previous: ${current:-none})"
+          fi
+
+      - name: Tag release
+        if: steps.version.outputs.release == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.version.outputs.next }}" -m "Release ${{ steps.version.outputs.next }}"
+          git push origin "${{ steps.version.outputs.next }}"
+
+      - name: Regenerate changelog
+        if: steps.version.outputs.release == 'true'
+        run: git-cliff --config cliff.toml -o CHANGELOG.md
+
+      - name: Commit changelog
+        if: steps.version.outputs.release == 'true'
+        run: |
+          git add CHANGELOG.md
+          git commit -m "chore(release): ${{ steps.version.outputs.next }}"
+          git push
+
+      - name: Create GitHub release
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git-cliff --config cliff.toml --current --strip header -o /tmp/release-notes.md
+          gh release create "${{ steps.version.outputs.next }}" \
+            --title "${{ steps.version.outputs.next }}" \
+            --notes-file /tmp/release-notes.md
