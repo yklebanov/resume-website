@@ -1,7 +1,12 @@
 ## [unreleased]
 
+### 🚀 Features
+
+- Add Contact Me button linking to a contact page (#7)
+
 ### ⚙️ Miscellaneous Tasks
 
+- *(changelog)* Update CHANGELOG.md
 - *(changelog)* Update CHANGELOG.md
 - *(changelog)* Update CHANGELOG.md
 
