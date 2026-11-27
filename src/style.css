@@ -31,5 +31,48 @@ h1 {
 .subtitle {
   font-size: clamp(1rem, 2.5vw, 1.25rem);
   color: #8b949e;
-  margin: 0;
+  margin: 0 0 1.75rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid #30363d;
+  border-radius: 999px;
+  background: #161b22;
+  color: #e6edf3;
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  background: #21262d;
+  border-color: #8b949e;
+}
+
+.back-link {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.back-link a {
+  color: #8b949e;
+  text-decoration: none;
+}
+
+.back-link a:hover,
+.back-link a:focus-visible {
+  color: #e6edf3;
+  text-decoration: underline;
 }
